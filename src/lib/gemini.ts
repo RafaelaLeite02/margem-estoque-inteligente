@@ -1,6 +1,9 @@
 import type { DashboardMetrics } from "./sales-data";
 
 export const GEMINI_MODEL = "gemini-2.5-flash";
+// Google blocks gemini-2.5-flash for newer API keys and points them to this model instead.
+export const GEMINI_FALLBACK_MODEL = "gemini-3.8-flash";
+export const GEMINI_MODELS = [GEMINI_MODEL, GEMINI_FALLBACK_MODEL] as const;
 
 export type Diagnostico = {
   resumo: string;
@@ -80,9 +83,14 @@ Entregue:
 Inclua também um resumo executivo de no máximo 2 frases.`;
 }
 
-export async function gerarDiagnostico(apiKey: string, metrics: DashboardMetrics, signal?: AbortSignal) {
+export async function gerarDiagnostico(
+  apiKey: string,
+  metrics: DashboardMetrics,
+  signal?: AbortSignal,
+  model: string = GEMINI_MODEL,
+) {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
     {
       method: "POST",
       signal: signal ?? null,
@@ -102,6 +110,11 @@ export async function gerarDiagnostico(apiKey: string, metrics: DashboardMetrics
   if (!res.ok) {
     const msg: string = json?.error?.message ?? `Erro ${res.status}`;
     if (res.status === 400 && /api key/i.test(msg)) throw new Error("API Key inválida. Verifique a chave do Gemini.");
+    if (res.status === 404 && model === GEMINI_MODEL)
+      throw new Error(
+        `O Google não libera mais o ${GEMINI_MODEL} para a sua chave. Selecione o modelo ${GEMINI_FALLBACK_MODEL} acima e tente novamente.`,
+      );
+    if (res.status === 404) throw new Error(`O modelo ${model} não está disponível para a sua chave.`);
     if (res.status === 403) throw new Error("Acesso negado pela API do Gemini. Verifique as permissões da sua chave.");
     if (res.status === 429) throw new Error("Limite de uso do Gemini atingido. Aguarde alguns instantes e tente novamente.");
     throw new Error(msg);
