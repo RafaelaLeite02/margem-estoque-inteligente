@@ -10,6 +10,22 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  vite: {
+    // Pre-bundle the dashboard's libraries at startup so the preview never re-optimizes
+    // mid-session (that reload left the open tab with two copies of React).
+    optimizeDeps: {
+      include: [
+        "recharts",
+        "sonner",
+        "lucide-react",
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge",
+        "@radix-ui/react-label",
+        "@radix-ui/react-slot",
+      ],
+    },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
