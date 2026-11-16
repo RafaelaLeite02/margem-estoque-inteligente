@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Eye, EyeOff, KeyRound, Loader2, PackageX, Rocket, Sparkles, Target, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -201,7 +201,7 @@ function LoadingState() {
   );
 }
 
-function SectionTitle({ icon: Icon, children }: { icon: typeof Sparkles; children: React.ReactNode }) {
+function SectionTitle({ icon: Icon, children }: { icon: typeof Sparkles; children: ReactNode }) {
   return (
     <h4 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
       <Icon className="size-3.5 text-ai" /> {children}
