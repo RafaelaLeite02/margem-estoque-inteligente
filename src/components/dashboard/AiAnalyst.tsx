@@ -14,8 +14,10 @@ const AI_STUDIO_URL = "https://aistudio.google.com/apikey";
 
 // The preview runs inside a frame that can swallow plain new-tab links, so open the tab explicitly.
 function openAiStudio(e: MouseEvent<HTMLAnchorElement>) {
-  const win = window.open(AI_STUDIO_URL, "_blank", "noopener,noreferrer");
+  // "noopener" in the features string makes window.open return null, so detach the opener manually.
+  const win = window.open(AI_STUDIO_URL, "_blank");
   if (win) {
+    win.opener = null;
     e.preventDefault();
     return;
   }
