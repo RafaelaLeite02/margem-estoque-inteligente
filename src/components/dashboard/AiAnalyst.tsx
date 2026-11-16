@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { GEMINI_MODEL, GEMINI_MODELS, gerarDiagnostico, type Diagnostico } from "@/lib/gemini";
+import { GROQ_MODEL, gerarDiagnostico, type Diagnostico } from "@/lib/groq";
 import type { DashboardMetrics } from "@/lib/sales-data";
 
-const ENV_KEY = (import.meta.env["VITE_GEMINI_API_KEY"] as string | undefined)?.trim() || "";
+const ENV_KEY = (import.meta.env["VITE_GROQ_API_KEY"] as string | undefined)?.trim() || "";
 
-const AI_STUDIO_URL = "https://aistudio.google.com/apikey";
+const KEYS_URL = "https://console.groq.com/keys";
 
 // The preview runs inside a frame that can swallow plain new-tab links, so open the tab explicitly.
-function openAiStudio(e: MouseEvent<HTMLAnchorElement>) {
+function openKeysPage(e: MouseEvent<HTMLAnchorElement>) {
   // "noopener" in the features string makes window.open return null, so detach the opener manually.
-  const win = window.open(AI_STUDIO_URL, "_blank");
+  const win = window.open(KEYS_URL, "_blank");
   if (win) {
     win.opener = null;
     e.preventDefault();
@@ -23,9 +23,9 @@ function openAiStudio(e: MouseEvent<HTMLAnchorElement>) {
   }
   try {
     e.preventDefault();
-    (window.top ?? window).location.href = AI_STUDIO_URL;
+    (window.top ?? window).location.href = KEYS_URL;
   } catch {
-    window.location.href = AI_STUDIO_URL;
+    window.location.href = KEYS_URL;
   }
 }
 
@@ -40,7 +40,6 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
   const [apiKey, setApiKey] = useState("");
   const [useEnv, setUseEnv] = useState(Boolean(ENV_KEY));
   const [show, setShow] = useState(false);
-  const [model, setModel] = useState<string>(GEMINI_MODEL);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Diagnostico | null>(null);
@@ -60,7 +59,7 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
       return;
     }
     if (!effectiveKey) {
-      toast.error("Informe sua API Key do Gemini.");
+      toast.error("Informe sua API Key da Groq.");
       return;
     }
     abortRef.current?.abort();
@@ -69,7 +68,7 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
     setLoading(true);
     setError(null);
     try {
-      const d = await gerarDiagnostico(effectiveKey, metrics, ctrl.signal, model);
+      const d = await gerarDiagnostico(effectiveKey, metrics, ctrl.signal);
       setResult(d);
       toast.success("Diagnóstico estratégico gerado.");
     } catch (e) {
@@ -101,7 +100,7 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
                 <h2 className="text-lg font-semibold">
                   Analista de Operações <span className="text-gradient-ai">IA</span>
                 </h2>
-                <p className="text-xs text-muted-foreground">Powered by Google Gemini · {model}</p>
+                <p className="text-xs text-muted-foreground">Powered by Groq · {GROQ_MODEL}</p>
               </div>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
@@ -111,8 +110,8 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="gemini-key" className="flex items-center gap-1.5 text-sm">
-              <KeyRound className="size-3.5" /> API Key do Gemini
+            <Label htmlFor="groq-key" className="flex items-center gap-1.5 text-sm">
+              <KeyRound className="size-3.5" /> API Key da Groq
             </Label>
             {ENV_KEY && (
               <label className="flex cursor-pointer items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
@@ -122,15 +121,15 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
                   onChange={(e) => setUseEnv(e.target.checked)}
                   className="accent-[var(--ai)]"
                 />
-                Usar chave configurada (VITE_GEMINI_API_KEY)
+                Usar chave configurada (VITE_GROQ_API_KEY)
               </label>
             )}
             {!(useEnv && ENV_KEY) && (
               <div className="relative">
                 <Input
-                  id="gemini-key"
+                  id="groq-key"
                   type={show ? "text" : "password"}
-                  placeholder="AIza..."
+                  placeholder="gsk_..."
                   autoComplete="off"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
@@ -147,12 +146,12 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
               </div>
             )}
             <p className="text-xs text-muted-foreground">
-              A chave fica só no seu navegador e é enviada diretamente ao Google.{" "}
+              A chave fica só no seu navegador e é enviada diretamente à Groq.{" "}
               <a
-                href={AI_STUDIO_URL}
+                href={KEYS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={openAiStudio}
+                onClick={openKeysPage}
                 className="font-medium text-ai underline underline-offset-2 hover:brightness-110"
               >
                 Obter chave grátis
@@ -160,24 +159,6 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="gemini-model" className="text-sm">
-              Modelo
-            </Label>
-            <select
-              id="gemini-model"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="h-9 w-full rounded-md border border-input bg-background px-3 font-mono text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              {GEMINI_MODELS.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                  {m === GEMINI_MODEL ? " (padrão)" : ""}
-                </option>
-              ))}
-            </select>
-          </div>
 
           {loading ? (
             <Button variant="surface" size="xl" className="w-full" onClick={stop}>
