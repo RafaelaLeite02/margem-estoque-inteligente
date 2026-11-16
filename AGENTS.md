@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- Sales metrics, CSV parsing and the critical-stock rule live in `src/lib/sales-data.ts` as pure functions — keeps the rules unit-testable in `src/test/sales-data.test.ts`.
+- The AI analyst calls Google Gemini directly from the browser with the visitor's own key (or `VITE_GEMINI_API_KEY`) via `src/lib/gemini.ts` — the owner explicitly asked for bring-your-own Gemini key; any value in `VITE_*` is public in the bundle.
