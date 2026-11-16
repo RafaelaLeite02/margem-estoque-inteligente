@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { GEMINI_MODEL, gerarDiagnostico, type Diagnostico } from "@/lib/gemini";
 import type { DashboardMetrics } from "@/lib/sales-data";
 
-const ENV_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || "";
+const ENV_KEY = (import.meta.env["VITE_GEMINI_API_KEY"] as string | undefined)?.trim() || "";
 
 function urgencyVariant(u: string) {
   const v = u.toLowerCase();
@@ -35,8 +35,14 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
   const effectiveKey = useEnv && ENV_KEY ? ENV_KEY : apiKey.trim();
 
   async function run() {
-    if (!metrics) return toast.error("Carregue os dados antes de gerar o diagnóstico.");
-    if (!effectiveKey) return toast.error("Informe sua API Key do Gemini.");
+    if (!metrics) {
+      toast.error("Carregue os dados antes de gerar o diagnóstico.");
+      return;
+    }
+    if (!effectiveKey) {
+      toast.error("Informe sua API Key do Gemini.");
+      return;
+    }
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;

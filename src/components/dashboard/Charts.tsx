@@ -15,7 +15,7 @@ const barConfig = {
   lucro: { label: "Lucro", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
-const PIE_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
+const PIE_COLORS: string[] = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
 
 function shortName(name: string) {
   return name.length > 14 ? `${name.slice(0, 13)}…` : name;
@@ -74,7 +74,7 @@ export function RevenueProfitChart({ metrics }: { metrics: DashboardMetrics }) {
 
 export function CategoryDonut({ metrics }: { metrics: DashboardMetrics }) {
   const config: ChartConfig = Object.fromEntries(
-    metrics.categorias.map((c, i) => [c.categoria, { label: c.categoria, color: PIE_COLORS[i % PIE_COLORS.length] }]),
+    metrics.categorias.map((c, i) => [c.categoria, { label: c.categoria, color: PIE_COLORS[i % PIE_COLORS.length] ?? "var(--chart-1)" }]),
   );
   const top = metrics.categorias[0];
 

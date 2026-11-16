@@ -85,7 +85,7 @@ export async function gerarDiagnostico(apiKey: string, metrics: DashboardMetrics
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
     {
       method: "POST",
-      signal,
+      signal: signal ?? null,
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: buildPrompt(metrics) }] }],

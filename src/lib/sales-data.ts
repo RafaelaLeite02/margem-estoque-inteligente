@@ -96,7 +96,7 @@ export function parseSalesCsv(text: string): SaleRow[] {
   const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim() !== "");
   if (lines.length < 2) throw new Error("O arquivo CSV está vazio ou não possui linhas de dados.");
 
-  const first = lines[0];
+  const first = lines[0] ?? "";
   const delimiter = (first.match(/;/g)?.length ?? 0) > (first.match(/,/g)?.length ?? 0) ? ";" : ",";
   const headers = splitCsvLine(first, delimiter).map(normalizeHeader);
   const missing = REQUIRED_COLUMNS.filter((c) => !headers.includes(c));
@@ -208,7 +208,7 @@ export function computeMetrics(rows: SaleRow[]): DashboardMetrics {
     itensCriticos: produtos.filter((p) => p.critico).length,
     produtos,
     categorias,
-    periodo: dates.length ? { inicio: dates[0], fim: dates[dates.length - 1] } : null,
+    periodo: dates.length ? { inicio: dates[0] ?? "", fim: dates[dates.length - 1] ?? "" } : null,
   };
 }
 
@@ -234,7 +234,7 @@ export function getDemoRows(): SaleRow[] {
   DEMO_PRODUCTS.forEach((p, pi) => {
     DEMO_MONTHS.forEach((data, mi) => {
       const wobble = 1 + (((pi * 7 + mi * 3) % 5) - 2) * 0.04;
-      const qtd = Math.max(1, Math.round(p.base * DEMO_SEASONALITY[mi] * wobble));
+      const qtd = Math.max(1, Math.round(p.base * (DEMO_SEASONALITY[mi] ?? 1) * wobble));
       const remainingMonths = DEMO_MONTHS.length - 1 - mi;
       rows.push({
         data,
