@@ -1,14 +1,33 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { Eye, EyeOff, KeyRound, Loader2, PackageX, Rocket, Sparkles, Target, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { GEMINI_MODEL, gerarDiagnostico, type Diagnostico } from "@/lib/gemini";
+import { GEMINI_MODEL, GEMINI_MODELS, gerarDiagnostico, type Diagnostico } from "@/lib/gemini";
 import type { DashboardMetrics } from "@/lib/sales-data";
 
 const ENV_KEY = (import.meta.env["VITE_GEMINI_API_KEY"] as string | undefined)?.trim() || "";
+
+const AI_STUDIO_URL = "https://aistudio.google.com/apikey";
+
+// The preview runs inside a frame that can swallow plain new-tab links, so open the tab explicitly.
+function openAiStudio(e: MouseEvent<HTMLAnchorElement>) {
+  // "noopener" in the features string makes window.open return null, so detach the opener manually.
+  const win = window.open(AI_STUDIO_URL, "_blank");
+  if (win) {
+    win.opener = null;
+    e.preventDefault();
+    return;
+  }
+  try {
+    e.preventDefault();
+    (window.top ?? window).location.href = AI_STUDIO_URL;
+  } catch {
+    window.location.href = AI_STUDIO_URL;
+  }
+}
 
 function urgencyVariant(u: string) {
   const v = u.toLowerCase();
@@ -21,6 +40,7 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
   const [apiKey, setApiKey] = useState("");
   const [useEnv, setUseEnv] = useState(Boolean(ENV_KEY));
   const [show, setShow] = useState(false);
+  const [model, setModel] = useState<string>(GEMINI_MODEL);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Diagnostico | null>(null);
@@ -49,7 +69,7 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
     setLoading(true);
     setError(null);
     try {
-      const d = await gerarDiagnostico(effectiveKey, metrics, ctrl.signal);
+      const d = await gerarDiagnostico(effectiveKey, metrics, ctrl.signal, model);
       setResult(d);
       toast.success("Diagnóstico estratégico gerado.");
     } catch (e) {
@@ -81,7 +101,7 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
                 <h2 className="text-lg font-semibold">
                   Analista de Operações <span className="text-gradient-ai">IA</span>
                 </h2>
-                <p className="text-xs text-muted-foreground">Powered by Google Gemini · {GEMINI_MODEL}</p>
+                <p className="text-xs text-muted-foreground">Powered by Google Gemini · {model}</p>
               </div>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
@@ -129,14 +149,34 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
             <p className="text-xs text-muted-foreground">
               A chave fica só no seu navegador e é enviada diretamente ao Google.{" "}
               <a
-                href="https://aistudio.google.com/app/apikey"
+                href={AI_STUDIO_URL}
                 target="_blank"
-                rel="noreferrer"
-                className="text-ai underline-offset-2 hover:underline"
+                rel="noopener noreferrer"
+                onClick={openAiStudio}
+                className="font-medium text-ai underline underline-offset-2 hover:brightness-110"
               >
                 Obter chave grátis
               </a>
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="gemini-model" className="text-sm">
+              Modelo
+            </Label>
+            <select
+              id="gemini-model"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="h-9 w-full rounded-md border border-input bg-background px-3 font-mono text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              {GEMINI_MODELS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                  {m === GEMINI_MODEL ? " (padrão)" : ""}
+                </option>
+              ))}
+            </select>
           </div>
 
           {loading ? (
