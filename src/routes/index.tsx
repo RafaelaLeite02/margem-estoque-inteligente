@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Dashboard de vendas e estoque com KPIs, gráficos interativos e diagnóstico estratégico gerado por IA (Groq · Llama 3.1).",
+          "Dashboard de vendas e estoque com KPIs, gráficos interativos e diagnóstico estratégico gerado por IA (Groq · GPT-OSS 120B).",
       },
       { property: "og:title", content: "Painel de Operações e Vendas com IA" },
       {

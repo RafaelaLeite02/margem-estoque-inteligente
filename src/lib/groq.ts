@@ -1,6 +1,6 @@
 import type { DashboardMetrics } from "./sales-data";
 
-export const GROQ_MODEL = "llama-3.1-8b-instant";
+export const GROQ_MODEL = "openai/gpt-oss-120b";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 export type Diagnostico = {
