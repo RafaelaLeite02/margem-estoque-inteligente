@@ -80,7 +80,7 @@ function Index() {
 
   const actions = (
     <>
-      <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={onFile} />
+      <input ref={fileRef} type="file" accept=".csv, .txt, text/plain, text/csv" className="hidden" onChange={onFile} />
       <Button variant="surface" size="xl" onClick={() => fileRef.current?.click()}>
         <Upload /> Upload de CSV
       </Button>
