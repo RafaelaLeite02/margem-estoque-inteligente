@@ -3,20 +3,6 @@ import type { DashboardMetrics } from "./sales-data";
 export const GROQ_MODEL = "openai/gpt-oss-120b";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-/** Placeholder shipped in `.env`; treated as "no key configured". */
-export const GROQ_KEY_PLACEHOLDER = "COLE_SUA_CHAVE_GSk_AQUI";
-
-export function normalizarChave(valor?: string | null) {
-  const v = (valor ?? "").trim();
-  if (!v || v.toUpperCase() === GROQ_KEY_PLACEHOLDER.toUpperCase() || /^COLE_SUA_CHAVE/i.test(v)) return "";
-  return v;
-}
-
-/** The key typed on screen wins; otherwise the `.env` key is used automatically. */
-export function resolverChaveGroq(digitada: string | null | undefined, env: string | null | undefined) {
-  return normalizarChave(digitada) || normalizarChave(env);
-}
-
 export type Diagnostico = {
   resumo: string;
   alertas_reposicao: { produto: string; urgencia: string; motivo: string; acao: string }[];

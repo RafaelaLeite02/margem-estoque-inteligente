@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { GROQ_MODEL, gerarDiagnostico, type Diagnostico } from "@/lib/groq";
 import type { DashboardMetrics } from "@/lib/sales-data";
 
-const ENV_KEY = (import.meta.env["VITE_GROQ_API_KEY"] as string | undefined)?.trim() || "";
-
 const KEYS_URL = "https://console.groq.com/keys";
 
 // The preview runs inside a frame that can swallow plain new-tab links, so open the tab explicitly.
@@ -38,7 +36,6 @@ function urgencyVariant(u: string) {
 
 export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
   const [apiKey, setApiKey] = useState("");
-  const [useEnv, setUseEnv] = useState(Boolean(ENV_KEY));
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +48,7 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
     setError(null);
   }, [metrics]);
 
-  const effectiveKey = useEnv && ENV_KEY ? ENV_KEY : apiKey.trim();
+  const effectiveKey = apiKey.trim();
 
   async function run() {
     if (!metrics) {
@@ -113,18 +110,6 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
             <Label htmlFor="groq-key" className="flex items-center gap-1.5 text-sm">
               <KeyRound className="size-3.5" /> API Key da Groq
             </Label>
-            {ENV_KEY && (
-              <label className="flex cursor-pointer items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
-                <input
-                  type="checkbox"
-                  checked={useEnv}
-                  onChange={(e) => setUseEnv(e.target.checked)}
-                  className="accent-[var(--ai)]"
-                />
-                Usar chave configurada (VITE_GROQ_API_KEY)
-              </label>
-            )}
-            {!(useEnv && ENV_KEY) && (
               <div className="relative">
                 <Input
                   id="groq-key"
@@ -144,7 +129,6 @@ export function AiAnalyst({ metrics }: { metrics: DashboardMetrics | null }) {
                   {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
-            )}
             <p className="text-xs text-muted-foreground">
               A chave fica só no seu navegador e é enviada diretamente à Groq.{" "}
               <a
