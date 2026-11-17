@@ -32,4 +32,4 @@ use the editor.
 ## Project rules
 
 - Sales metrics, CSV parsing and the critical-stock rule live in `src/lib/sales-data.ts` as pure functions — keeps the rules unit-testable in `src/test/sales-data.test.ts`.
-- The AI analyst calls the Groq chat completions API directly from the browser with the visitor's own key (or `VITE_GROQ_API_KEY`) via `src/lib/groq.ts` — the owner explicitly asked for bring-your-own Groq key; any value in `VITE_*` is public in the bundle.
+- The AI analyst calls the Groq chat completions API directly from the browser with the key the visitor types on screen via `src/lib/groq.ts` — the owner requires a Groq key for every analysis (no env-var key, no local fallback).
